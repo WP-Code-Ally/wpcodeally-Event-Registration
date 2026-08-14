@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<ruleset name="WPCodeAlly Event Registration">
+	<description>WordPress Coding Standards for WPCodeAlly Event Registration.</description>
+
+	<file>.</file>
+
+	<exclude-pattern>*/vendor/*</exclude-pattern>
+	<exclude-pattern>*/node_modules/*</exclude-pattern>
+	<exclude-pattern>*/Developer/*</exclude-pattern>
+	<exclude-pattern>*/scripts/*</exclude-pattern>
+	<exclude-pattern>*/tests/*</exclude-pattern>
+	<exclude-pattern>*/languages/*</exclude-pattern>
+
+	<rule ref="WordPress">
+		<exclude name="WordPress.Files.FileName.InvalidClassFileName"/>
+		<exclude name="WordPress.Files.FileName.NotHyphenatedLowercase"/>
+	</rule>
+
+	<rule ref="WordPress.Security.EscapeOutput">
+		<properties>
+			<property name="customEscapingFunctions" type="array">
+				<element value="wc_esc_json"/>
+			</property>
+		</properties>
+	</rule>
+
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<properties>
+			<property name="prefixes" type="array">
+				<element value="wpca_er"/>
+				<element value="WPCA_ER"/>
+				<element value="wpcodeally"/>
+			</property>
+		</properties>
+	</rule>
+
+	<config name="minimum_supported_wp_version" value="6.0"/>
+	<config name="testVersion" value="7.4-"/>
+</ruleset>

@@ -3,11 +3,16 @@
  * My Account: event registration rows.
  *
  * @var array[] $rows Each row: order, item, product, form_id, entry_id, start_url, edit_url, order_date, order_total.
+ * @var int     $current_page Current pagination page.
+ * @var int     $total_pages  Total pagination pages.
  *
  * @package WPCA_Event_Registration
  */
 
 defined( 'ABSPATH' ) || exit;
+
+$current_page = isset( $current_page ) ? max( 1, (int) $current_page ) : 1;
+$total_pages  = isset( $total_pages ) ? max( 1, (int) $total_pages ) : 1;
 ?>
 <table class="woocommerce-orders-table woocommerce-MyAccount-orders shop_table shop_table_responsive my_account_orders account-orders-table">
 	<thead>
@@ -66,3 +71,13 @@ defined( 'ABSPATH' ) || exit;
 		<?php endforeach; ?>
 	</tbody>
 </table>
+<?php
+$pagination = wpca_er()->account instanceof WPCA_ER_Account
+	? wpca_er()->account->get_pagination_markup( $current_page, $total_pages )
+	: '';
+
+if ( $pagination ) {
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- markup built with escaping helpers.
+	echo $pagination;
+}
+?>

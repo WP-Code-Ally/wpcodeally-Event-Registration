@@ -1,0 +1,29 @@
+{
+	"name": "wpcodeally/event-registration",
+	"description": "Links Gravity Forms registrations to WooCommerce orders.",
+	"type": "wordpress-plugin",
+	"license": "GPL-2.0-or-later",
+	"require": {
+		"php": ">=7.4"
+	},
+	"require-dev": {
+		"dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+		"phpcompatibility/phpcompatibility-wp": "^2.1",
+		"phpunit/phpunit": "^9.6",
+		"wp-cli/i18n-command": "^2.5",
+		"wp-coding-standards/wpcs": "^3.1",
+		"yoast/phpunit-polyfills": "^2.0"
+	},
+	"scripts": {
+		"phpcs": "phpcs",
+		"phpcbf": "phpcbf",
+		"test": "phpunit",
+		"make-pot": "php vendor/wp-cli/wp-cli/php/boot-fs.php i18n make-pot . languages/wpcodeally-event-registration.pot --domain=wpcodeally-event-registration --exclude=vendor,node_modules,.git,Developer,scripts,tests"
+	},
+	"config": {
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		},
+		"sort-packages": true
+	}
+}

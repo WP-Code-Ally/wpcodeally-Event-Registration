@@ -32,6 +32,7 @@ class WPCA_ER_Admin_Settings {
 
 		$checks = array(
 			'[WPCA_ER_registration',
+			'[wpca_er_registration',
 			'[gravityform',
 			'[gravityforms',
 			'wp:gravityforms/',
@@ -178,7 +179,7 @@ class WPCA_ER_Admin_Settings {
 							<input type="hidden" name="<?php echo esc_attr( WPCA_ER_Plugin::OPTION_DEBUG ); ?>" value="0" />
 							<label>
 								<input type="checkbox" name="<?php echo esc_attr( WPCA_ER_Plugin::OPTION_DEBUG ); ?>" value="1" <?php checked( WPCA_ER_Plugin::is_debug() ); ?> />
-								<?php esc_html_e( 'Write technical messages to the WooCommerce log (no personal data).', 'wpcodeally-event-registration' ); ?>
+								<?php esc_html_e( 'Write technical messages to wp-content/wpcodeally-event-registration.log (no personal data).', 'wpcodeally-event-registration' ); ?>
 							</label>
 						</td>
 					</tr>

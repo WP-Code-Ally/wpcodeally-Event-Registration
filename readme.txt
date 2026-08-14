@@ -1,10 +1,10 @@
 === WPCodeAlly Event Registration ===
-Contributors: ono
+Contributors: wpcodeally
 Tags: woocommerce, gravity-forms, events, registration, checkout
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.0.4
+Stable tag: 1.0.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -17,9 +17,9 @@ Per-product registration pages, Gravity Forms linked to orders, checkout redirec
 * **Registration page** or **URL** — where that product’s customers go after checkout (same idea as pointing Custom Thank You at a page).
 * **Gravity Forms form ID** — must match the form embedded on that page so submissions can link to the order line.
 
-**You do not need `[WPCA_ER_registration]`** if the page already embeds Gravity Forms the normal way (Gutenberg block or `[gravityform]` shortcode). The plugin still adds a secure hidden field to the form when the URL contains `order`, `key`, and (when needed) `ono_item`.
+**You do not need `[WPCA_ER_registration]`** if the page already embeds Gravity Forms the normal way (Gutenberg block or `[gravityform]` shortcode). The plugin still adds a secure hidden field to the form when the URL contains `order`, `key`, and (when needed) `wpca_er_item` (legacy `ono_item` is still accepted).
 
-**Optional `[WPCA_ER_registration]` shortcode** — useful for a single “default” landing page that loads the correct form from the order, or for the optional **WooCommerce → Event registration** default page.
+**Optional `[WPCA_ER_registration]` or `[wpca_er_registration]` shortcode** — useful for a single “default” landing page that loads the correct form from the order, or for the optional **WooCommerce → Event registration** default page.
 
 **WooCommerce → Event registration** — optional default page when a product has a form ID but no per-product page.
 
@@ -46,13 +46,31 @@ No. Use your form block or `[gravityform id="…"]` as today. Keep the **form ID
 
 = Uninstall =
 
-Removes options `WPCA_ER_debug`, `WPCA_ER_registration_page_id`, and `WPCA_ER_internal_version`, and deletes the `wp-content/wpcodeally-event-registration.log` file. Does not remove product or order line meta.
+Removes options `WPCA_ER_debug`, `WPCA_ER_registration_page_id`, and `WPCA_ER_internal_version`, and deletes the `wp-content/wpcodeally-event-registration.log` file. Does not remove product, order, or order line meta.
 
 = Why is there no order block after submit? =
 
 The recap is only added for **Text** confirmations. **Redirect** or **Page** confirmations cannot be extended the same way; use a thank-you page that shows order details instead.
 
 == Changelog ==
+
+= 1.0.7 =
+* Restore Woo thank-you tracking on the first post-checkout registration landing (`wpca_er_checkout=1`) so PixelYourSite, GTM4WP, and `woocommerce_thankyou` fire once without sending customers through `/checkout/order-received/`.
+
+= 1.0.6 =
+* Enqueue dedicated frontend and admin stylesheets instead of relying on inline CSS.
+* Paginate My Account → Event registrations (default 20 orders per page; filter `wpca_er_registrations_orders_per_page`).
+* Cache retroactive Gravity Forms entry lookups per HTTP request to avoid duplicate API calls.
+* Add `languages/wpcodeally-event-registration.pot`, commercial `README.md`, PHPCS config, PHPUnit tests, and Composer dev tooling.
+
+= 1.0.5 =
+* Fix: register the **Event registrations** My Account menu item via `woocommerce_account_menu_items`.
+* Add `load_plugin_textdomain()` and a `languages/` path for translations.
+* Add WordPress privacy export/erase hooks for order-registration linkage metadata.
+* Harden product save handlers with explicit `edit_product` capability checks.
+* Standardize query args and admin field names to the `wpca_er_` prefix (legacy `ono_` URLs and POST fields still work).
+* Validate order status before showing registration forms on the front end.
+* Multisite-aware uninstall cleanup; directory `index.php` sentinels; corrected debug log settings text.
 
 = 1.0.4 =
 * Clicking **Event registration** on an order that already has a GF entry now opens the form pre-populated for editing instead of showing a blank form.

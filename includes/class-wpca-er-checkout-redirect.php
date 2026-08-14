@@ -25,6 +25,11 @@ class WPCA_ER_Checkout_Redirect {
 	public const RETURN_URL_PRIORITY = 100;
 
 	/**
+	 * Query flag marking a post-checkout / gateway return (not My Account).
+	 */
+	public const QUERY_CHECKOUT_FLAG = 'wpca_er_checkout';
+
+	/**
 	 * Tracks order IDs already logged this request to prevent duplicate log entries.
 	 *
 	 * @var int[]
@@ -116,6 +121,7 @@ class WPCA_ER_Checkout_Redirect {
 					'order'                                => $order->get_id(),
 					'key'                                  => $order->get_order_key(),
 					WPCA_ER_Order_Bridge::QUERY_ITEM_PARAM => (int) $first['item_id'],
+					self::QUERY_CHECKOUT_FLAG              => '1',
 				),
 				$first['base_url']
 			)

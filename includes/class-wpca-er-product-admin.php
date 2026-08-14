@@ -216,6 +216,45 @@ class WPCA_ER_Product_Admin {
 	}
 
 	/**
+	 * Read a POST field, accepting a legacy field name when present.
+	 *
+	 * @param string $field  Current field name.
+	 * @param string $legacy Legacy field name.
+	 * @return mixed|null
+	 */
+	private static function get_post_field( $field, $legacy = '' ) {
+		if ( isset( $_POST[ $field ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			return wp_unslash( $_POST[ $field ] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		}
+
+		if ( $legacy && isset( $_POST[ $legacy ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			return wp_unslash( $_POST[ $legacy ] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		}
+
+		return null;
+	}
+
+	/**
+	 * Read a POST array field value by loop index, accepting a legacy field name.
+	 *
+	 * @param string $field  Current field name.
+	 * @param int    $loop   Variation loop index.
+	 * @param string $legacy Legacy field name.
+	 * @return mixed|null
+	 */
+	private static function get_post_array_field( $field, $loop, $legacy = '' ) {
+		if ( isset( $_POST[ $field ], $_POST[ $field ][ $loop ] ) && is_array( $_POST[ $field ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			return wp_unslash( $_POST[ $field ][ $loop ] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		}
+
+		if ( $legacy && isset( $_POST[ $legacy ], $_POST[ $legacy ][ $loop ] ) && is_array( $_POST[ $legacy ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			return wp_unslash( $_POST[ $legacy ][ $loop ] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		}
+
+		return null;
+	}
+
+	/**
 	 * Output fields on the product edit screen.
 	 *
 	 * @return void
@@ -239,17 +278,17 @@ class WPCA_ER_Product_Admin {
 		$form_id  = $product->get_meta( self::META_FORM_ID );
 		$priority = $product->get_meta( self::META_REDIRECT_PRIORITY, true );
 
-		echo '<div class="options_group ono-er-product-fields">';
-		echo '<h4 style="padding:0 12px;margin:1em 0 0;">' . esc_html__( 'Event registration', 'wpcodeally-event-registration' ) . '</h4>';
-		echo '<p class="form-field" style="padding:0 12px;color:#646970;">' .
-			esc_html__( 'Each event can use its own page after checkout. You may embed Gravity Forms the usual way (block or [gravityform] shortcode)—no extra Ono shortcode required. Optional: use [WPCA_ER_registration] on a shared default page if you prefer one template.', 'wpcodeally-event-registration' ) .
+		echo '<div class="options_group wpca-er-product-fields">';
+		echo '<h4 class="wpca-er-product-fields__heading">' . esc_html__( 'Event registration', 'wpcodeally-event-registration' ) . '</h4>';
+		echo '<p class="form-field wpca-er-product-fields__intro">' .
+			esc_html__( 'Each event can use its own page after checkout. You may embed Gravity Forms the usual way (block or [gravityform] shortcode). Optional: use [WPCA_ER_registration] on a shared default page if you prefer one template.', 'wpcodeally-event-registration' ) .
 			'</p>';
 
-		echo '<p class="form-field"><label for="ono_reg_registration_page">' . esc_html__( 'Registration page', 'wpcodeally-event-registration' ) . '</label>';
+		echo '<p class="form-field"><label for="wpca_er_reg_registration_page">' . esc_html__( 'Registration page', 'wpcodeally-event-registration' ) . '</label>';
 		wp_dropdown_pages(
 			array(
-				'name'              => 'ono_reg_registration_page',
-				'id'                => 'ono_reg_registration_page',
+				'name'              => 'wpca_er_reg_registration_page',
+				'id'                => 'wpca_er_reg_registration_page',
 				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- consumed by wp_dropdown_pages().
 				'selected'          => $selected,
 				'show_option_none'  => esc_html__( '&mdash; Select a page &mdash;', 'wpcodeally-event-registration' ),
@@ -261,8 +300,8 @@ class WPCA_ER_Product_Admin {
 
 		woocommerce_wp_text_input(
 			array(
-				'id'          => 'ono_reg_registration_url',
-				'name'        => 'ono_reg_registration_url',
+				'id'          => 'wpca_er_reg_registration_url',
+				'name'        => 'wpca_er_reg_registration_url',
 				'label'       => __( 'Or registration URL', 'wpcodeally-event-registration' ),
 				'placeholder' => 'https://',
 				'description' => __( 'Use this instead of the dropdown for an external address. Leave empty to use the page above.', 'wpcodeally-event-registration' ),
@@ -274,8 +313,8 @@ class WPCA_ER_Product_Admin {
 
 		woocommerce_wp_text_input(
 			array(
-				'id'                => 'ono_reg_gf_form_id',
-				'name'              => 'ono_reg_gf_form_id',
+				'id'                => 'wpca_er_reg_gf_form_id',
+				'name'              => 'wpca_er_reg_gf_form_id',
 				'label'             => __( 'Gravity Forms form ID', 'wpcodeally-event-registration' ),
 				'description'       => __( 'Optional. Auto-detected from the registration page when left blank. Set manually only if auto-detection picks the wrong form.', 'wpcodeally-event-registration' ),
 				'type'              => 'number',
@@ -290,8 +329,8 @@ class WPCA_ER_Product_Admin {
 
 		woocommerce_wp_text_input(
 			array(
-				'id'                => 'ono_reg_redirect_priority',
-				'name'              => 'ono_reg_redirect_priority',
+				'id'                => 'wpca_er_reg_redirect_priority',
+				'name'              => 'wpca_er_reg_redirect_priority',
 				'label'             => __( 'Checkout redirect priority', 'wpcodeally-event-registration' ),
 				'description'       => __( 'If one order contains several events, the lowest number is used first for the post-checkout redirect (default 10).', 'wpcodeally-event-registration' ),
 				'type'              => 'number',
@@ -318,30 +357,35 @@ class WPCA_ER_Product_Admin {
 			return;
 		}
 
+		if ( ! current_user_can( 'edit_product', $post_id ) ) {
+			return;
+		}
+
 		$product = wc_get_product( $post_id );
 		if ( ! $product ) {
 			return;
 		}
 
-		$url = '';
-		if ( isset( $_POST['ono_reg_registration_url'] ) ) {
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized via esc_url_raw() below.
-			$url = esc_url_raw( trim( (string) wp_unslash( $_POST['ono_reg_registration_url'] ) ) );
-		}
+		$url_raw = self::get_post_field( 'wpca_er_reg_registration_url', 'ono_reg_registration_url' );
+		$url     = null !== $url_raw ? esc_url_raw( trim( (string) $url_raw ) ) : '';
 
 		if ( $url ) {
 			$product->update_meta_data( self::META_REGISTRATION_PAGE, $url );
-		} elseif ( isset( $_POST['ono_reg_registration_page'] ) ) {
-			$page_id = absint( wp_unslash( $_POST['ono_reg_registration_page'] ) );
-			if ( $page_id > 0 ) {
-				$product->update_meta_data( self::META_REGISTRATION_PAGE, $page_id );
-			} else {
-				$product->delete_meta_data( self::META_REGISTRATION_PAGE );
+		} else {
+			$page_raw = self::get_post_field( 'wpca_er_reg_registration_page', 'ono_reg_registration_page' );
+			if ( null !== $page_raw ) {
+				$page_id = absint( $page_raw );
+				if ( $page_id > 0 ) {
+					$product->update_meta_data( self::META_REGISTRATION_PAGE, $page_id );
+				} else {
+					$product->delete_meta_data( self::META_REGISTRATION_PAGE );
+				}
 			}
 		}
 
-		if ( isset( $_POST['ono_reg_gf_form_id'] ) ) {
-			$form_id = absint( wp_unslash( $_POST['ono_reg_gf_form_id'] ) );
+		$form_raw = self::get_post_field( 'wpca_er_reg_gf_form_id', 'ono_reg_gf_form_id' );
+		if ( null !== $form_raw ) {
+			$form_id = absint( $form_raw );
 			if ( $form_id > 0 ) {
 				$product->update_meta_data( self::META_FORM_ID, $form_id );
 			} else {
@@ -349,8 +393,9 @@ class WPCA_ER_Product_Admin {
 			}
 		}
 
-		if ( isset( $_POST['ono_reg_redirect_priority'] ) ) {
-			$priority = absint( wp_unslash( $_POST['ono_reg_redirect_priority'] ) );
+		$priority_raw = self::get_post_field( 'wpca_er_reg_redirect_priority', 'ono_reg_redirect_priority' );
+		if ( null !== $priority_raw ) {
+			$priority = absint( $priority_raw );
 			if ( $priority > 0 ) {
 				$product->update_meta_data( self::META_REDIRECT_PRIORITY, $priority );
 			} else {
@@ -387,7 +432,7 @@ class WPCA_ER_Product_Admin {
 		echo '<label>' . esc_html__( 'Registration page', 'wpcodeally-event-registration' ) . '</label>';
 		wp_dropdown_pages(
 			array(
-				'name'              => 'ono_reg_registration_page_var[' . esc_attr( $loop_key ) . ']',
+				'name'              => 'wpca_er_reg_registration_page_var[' . esc_attr( $loop_key ) . ']',
 				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- consumed by wp_dropdown_pages().
 				'selected'          => $selected,
 				'show_option_none'  => esc_html__( '&mdash; Same as parent / none &mdash;', 'wpcodeally-event-registration' ),
@@ -398,18 +443,18 @@ class WPCA_ER_Product_Admin {
 		echo '</div>';
 
 		echo '<div class="form-row form-row-full">';
-		echo '<label for="ono_reg_registration_url_var_' . esc_attr( $loop_key ) . '">' . esc_html__( 'Or registration URL', 'wpcodeally-event-registration' ) . '</label>';
-		echo '<input type="url" class="short" name="ono_reg_registration_url_var[' . esc_attr( $loop_key ) . ']" id="ono_reg_registration_url_var_' . esc_attr( $loop_key ) . '" value="' . esc_attr( $url_value ) . '" placeholder="https://" />';
+		echo '<label for="wpca_er_reg_registration_url_var_' . esc_attr( $loop_key ) . '">' . esc_html__( 'Or registration URL', 'wpcodeally-event-registration' ) . '</label>';
+		echo '<input type="url" class="short" name="wpca_er_reg_registration_url_var[' . esc_attr( $loop_key ) . ']" id="wpca_er_reg_registration_url_var_' . esc_attr( $loop_key ) . '" value="' . esc_attr( $url_value ) . '" placeholder="https://" />';
 		echo '</div>';
 
 		echo '<div class="form-row form-row-full">';
-		echo '<label for="ono_reg_gf_form_id_' . esc_attr( $loop_key ) . '">' . esc_html__( 'Gravity Forms form ID', 'wpcodeally-event-registration' ) . '</label>';
-		echo '<input type="number" min="0" step="1" class="short" name="ono_reg_gf_form_id_var[' . esc_attr( $loop_key ) . ']" id="ono_reg_gf_form_id_' . esc_attr( $loop_key ) . '" value="' . esc_attr( $value ? (string) absint( $value ) : '' ) . '" />';
+		echo '<label for="wpca_er_reg_gf_form_id_' . esc_attr( $loop_key ) . '">' . esc_html__( 'Gravity Forms form ID', 'wpcodeally-event-registration' ) . '</label>';
+		echo '<input type="number" min="0" step="1" class="short" name="wpca_er_reg_gf_form_id_var[' . esc_attr( $loop_key ) . ']" id="wpca_er_reg_gf_form_id_' . esc_attr( $loop_key ) . '" value="' . esc_attr( $value ? (string) absint( $value ) : '' ) . '" />';
 		echo '</div>';
 
 		echo '<div class="form-row form-row-full">';
-		echo '<label for="ono_reg_redirect_priority_' . esc_attr( $loop_key ) . '">' . esc_html__( 'Redirect priority', 'wpcodeally-event-registration' ) . '</label>';
-		echo '<input type="number" min="0" step="1" class="short" name="ono_reg_redirect_priority_var[' . esc_attr( $loop_key ) . ']" id="ono_reg_redirect_priority_' . esc_attr( $loop_key ) . '" value="' . esc_attr( '' !== $priority && null !== $priority ? (string) absint( $priority ) : '10' ) . '" />';
+		echo '<label for="wpca_er_reg_redirect_priority_' . esc_attr( $loop_key ) . '">' . esc_html__( 'Redirect priority', 'wpcodeally-event-registration' ) . '</label>';
+		echo '<input type="number" min="0" step="1" class="short" name="wpca_er_reg_redirect_priority_var[' . esc_attr( $loop_key ) . ']" id="wpca_er_reg_redirect_priority_' . esc_attr( $loop_key ) . '" value="' . esc_attr( '' !== $priority && null !== $priority ? (string) absint( $priority ) : '10' ) . '" />';
 		echo '</div>';
 	}
 
@@ -425,35 +470,35 @@ class WPCA_ER_Product_Admin {
 			return;
 		}
 
+		if ( ! current_user_can( 'edit_product', $variation_id ) ) {
+			return;
+		}
+
 		$product = wc_get_product( $variation_id );
 		if ( ! $product ) {
 			return;
 		}
 
-		$url = '';
-		if ( isset( $_POST['ono_reg_registration_url_var'], $_POST['ono_reg_registration_url_var'][ $loop ] ) && is_array( $_POST['ono_reg_registration_url_var'] ) ) {
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- values are sanitized after unslashing.
-			$posted_urls = wp_unslash( $_POST['ono_reg_registration_url_var'] );
-			$url         = isset( $posted_urls[ $loop ] ) ? esc_url_raw( trim( (string) $posted_urls[ $loop ] ) ) : '';
-		}
+		$url_raw = self::get_post_array_field( 'wpca_er_reg_registration_url_var', $loop, 'ono_reg_registration_url_var' );
+		$url     = null !== $url_raw ? esc_url_raw( trim( (string) $url_raw ) ) : '';
 
 		if ( $url ) {
 			$product->update_meta_data( self::META_REGISTRATION_PAGE, $url );
-		} elseif ( isset( $_POST['ono_reg_registration_page_var'], $_POST['ono_reg_registration_page_var'][ $loop ] ) && is_array( $_POST['ono_reg_registration_page_var'] ) ) {
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- values are sanitized via absint() below.
-			$posted = wp_unslash( $_POST['ono_reg_registration_page_var'] );
-			$page   = isset( $posted[ $loop ] ) ? absint( $posted[ $loop ] ) : 0;
-			if ( $page > 0 ) {
-				$product->update_meta_data( self::META_REGISTRATION_PAGE, $page );
-			} else {
-				$product->delete_meta_data( self::META_REGISTRATION_PAGE );
+		} else {
+			$page_raw = self::get_post_array_field( 'wpca_er_reg_registration_page_var', $loop, 'ono_reg_registration_page_var' );
+			if ( null !== $page_raw ) {
+				$page = absint( $page_raw );
+				if ( $page > 0 ) {
+					$product->update_meta_data( self::META_REGISTRATION_PAGE, $page );
+				} else {
+					$product->delete_meta_data( self::META_REGISTRATION_PAGE );
+				}
 			}
 		}
 
-		if ( isset( $_POST['ono_reg_gf_form_id_var'], $_POST['ono_reg_gf_form_id_var'][ $loop ] ) && is_array( $_POST['ono_reg_gf_form_id_var'] ) ) {
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- values are sanitized via absint() below.
-			$posted  = wp_unslash( $_POST['ono_reg_gf_form_id_var'] );
-			$form_id = isset( $posted[ $loop ] ) ? absint( $posted[ $loop ] ) : 0;
+		$form_raw = self::get_post_array_field( 'wpca_er_reg_gf_form_id_var', $loop, 'ono_reg_gf_form_id_var' );
+		if ( null !== $form_raw ) {
+			$form_id = absint( $form_raw );
 			if ( $form_id > 0 ) {
 				$product->update_meta_data( self::META_FORM_ID, $form_id );
 			} else {
@@ -461,10 +506,9 @@ class WPCA_ER_Product_Admin {
 			}
 		}
 
-		if ( isset( $_POST['ono_reg_redirect_priority_var'], $_POST['ono_reg_redirect_priority_var'][ $loop ] ) && is_array( $_POST['ono_reg_redirect_priority_var'] ) ) {
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- values are sanitized via absint() below.
-			$posted_p = wp_unslash( $_POST['ono_reg_redirect_priority_var'] );
-			$priority = isset( $posted_p[ $loop ] ) ? absint( $posted_p[ $loop ] ) : 0;
+		$priority_raw = self::get_post_array_field( 'wpca_er_reg_redirect_priority_var', $loop, 'ono_reg_redirect_priority_var' );
+		if ( null !== $priority_raw ) {
+			$priority = absint( $priority_raw );
 			if ( $priority > 0 ) {
 				$product->update_meta_data( self::META_REDIRECT_PRIORITY, $priority );
 			} else {

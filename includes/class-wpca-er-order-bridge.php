@@ -18,7 +18,12 @@ class WPCA_ER_Order_Bridge {
 	public const ITEM_META_FORM_ID  = '_wpca_er_form_id';
 
 	public const POST_CONTEXT     = 'WPCA_ER_ctx';
-	public const QUERY_ITEM_PARAM = 'ono_item';
+	public const QUERY_ITEM_PARAM = 'wpca_er_item';
+
+	/**
+	 * Legacy line-item query arg retained for backward compatibility.
+	 */
+	public const LEGACY_QUERY_ITEM_PARAM = 'ono_item';
 
 	/**
 	 * Edit context for My Account entry update flow (current HTTP request, initial render).
@@ -26,6 +31,13 @@ class WPCA_ER_Order_Bridge {
 	 * @var array|null
 	 */
 	private static $edit_context = null;
+
+	/**
+	 * Request-level cache for retroactive entry lookups.
+	 *
+	 * @var array<string, int>
+	 */
+	private static $retroactive_link_cache = array();
 
 	/**
 	 * Register hooks.
@@ -77,6 +89,23 @@ class WPCA_ER_Order_Bridge {
 	 */
 	public static function clear_edit_context() {
 		self::$edit_context = null;
+	}
+
+	/**
+	 * Read the line-item query arg from the current request, accepting legacy names.
+	 *
+	 * @return int
+	 */
+	public static function get_request_item_id() {
+		if ( isset( $_GET[ self::QUERY_ITEM_PARAM ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return absint( wp_unslash( $_GET[ self::QUERY_ITEM_PARAM ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		}
+
+		if ( isset( $_GET[ self::LEGACY_QUERY_ITEM_PARAM ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return absint( wp_unslash( $_GET[ self::LEGACY_QUERY_ITEM_PARAM ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		}
+
+		return 0;
 	}
 
 	/**
@@ -274,14 +303,14 @@ class WPCA_ER_Order_Bridge {
 
 		if ( $existing_entry && ! $is_update ) {
 			$validation_result['is_valid'] = false;
-			$validation_result['message']  = esc_html__( 'This order already has a registration on file. Please use My Account to edit your registration.', 'wpcodeally-event-registration' );
+			$validation_result['message']  = __( 'This order already has a registration on file. Please use My Account to edit your registration.', 'wpcodeally-event-registration' );
 			return $validation_result;
 		}
 
 		$status = $order->get_status();
-		if ( ! in_array( $status, array( 'processing', 'completed', 'on-hold' ), true ) ) {
+		if ( ! WPCA_ER_Plugin::order_allows_registration( $order ) ) {
 			$validation_result['is_valid'] = false;
-			$validation_result['message']  = esc_html__( 'Registration is only available for paid or processing orders.', 'wpcodeally-event-registration' );
+			$validation_result['message']  = __( 'Registration is only available for paid or processing orders.', 'wpcodeally-event-registration' );
 			return $validation_result;
 		}
 
@@ -462,11 +491,11 @@ class WPCA_ER_Order_Bridge {
 			$qty       = $item->get_quantity();
 			$total     = $order->get_formatted_line_subtotal( $item );
 			$highlight = $item_id && (int) $item->get_id() === (int) $item_id;
-			$row_class = $highlight ? 'wpca-er-order-summary__row ono-er-order-summary__row--highlight' : 'wpca-er-order-summary__row';
+			$row_class = $highlight ? 'wpca-er-order-summary__row wpca-er-order-summary__row--highlight' : 'wpca-er-order-summary__row';
 
 			$rows .= '<tr class="' . esc_attr( $row_class ) . '">';
 			$rows .= '<td>' . esc_html( wp_strip_all_tags( $name ) ) . ' × ' . esc_html( (string) $qty ) . '</td>';
-			$rows .= '<td style="text-align:right;">' . wp_kses_post( $total ) . '</td>';
+			$rows .= '<td class="wpca-er-order-summary__amount">' . wp_kses_post( $total ) . '</td>';
 			$rows .= '</tr>';
 		}
 
@@ -482,7 +511,7 @@ class WPCA_ER_Order_Bridge {
 
 		ob_start();
 		?>
-		<div class="wpca-er-order-summary woocommerce" style="margin-top:2em;padding-top:1.5em;border-top:1px solid #ddd;">
+		<div class="wpca-er-order-summary woocommerce">
 			<h3 class="wpca-er-order-summary__title"><?php esc_html_e( 'Your order', 'wpcodeally-event-registration' ); ?></h3>
 			<p class="wpca-er-order-summary__meta">
 				<strong><?php esc_html_e( 'Order', 'wpcodeally-event-registration' ); ?>:</strong>
@@ -497,19 +526,19 @@ class WPCA_ER_Order_Bridge {
 					<?php echo esc_html( $billing_name ); ?>
 				</p>
 			<?php endif; ?>
-			<table class="shop_table ono-er-order-summary__table" style="width:100%;max-width:520px;">
+			<table class="shop_table wpca-er-order-summary__table">
 				<tbody>
 					<?php echo $rows; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- cells built with escaping above. ?>
 				</tbody>
 				<tfoot>
 					<tr>
-						<th scope="row" style="text-align:left;"><?php esc_html_e( 'Total', 'wpcodeally-event-registration' ); ?></th>
-						<td style="text-align:right;"><?php echo wp_kses_post( $total ); ?></td>
+						<th scope="row"><?php esc_html_e( 'Total', 'wpcodeally-event-registration' ); ?></th>
+						<td class="wpca-er-order-summary__amount"><?php echo wp_kses_post( $total ); ?></td>
 					</tr>
 					<?php if ( $payment ) : ?>
 						<tr>
-							<th scope="row" style="text-align:left;"><?php esc_html_e( 'Payment', 'wpcodeally-event-registration' ); ?></th>
-							<td style="text-align:right;"><?php echo esc_html( $payment ); ?></td>
+							<th scope="row"><?php esc_html_e( 'Payment', 'wpcodeally-event-registration' ); ?></th>
+							<td class="wpca-er-order-summary__amount"><?php echo esc_html( $payment ); ?></td>
 						</tr>
 					<?php endif; ?>
 				</tfoot>
@@ -559,7 +588,7 @@ class WPCA_ER_Order_Bridge {
 			return null;
 		}
 
-		$item_id = isset( $_GET[ self::QUERY_ITEM_PARAM ] ) ? absint( wp_unslash( $_GET[ self::QUERY_ITEM_PARAM ] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$item_id = self::get_request_item_id();
 		$item    = null;
 
 		if ( $item_id ) {
@@ -826,46 +855,54 @@ class WPCA_ER_Order_Bridge {
 	 */
 	public static function maybe_retroactively_link_entry( $item, $form_id ) {
 		$item_id  = (int) $item->get_id();
+		$form_id  = (int) $form_id;
+		$cache_key = $item_id . ':' . $form_id;
+
+		if ( isset( self::$retroactive_link_cache[ $cache_key ] ) ) {
+			return self::$retroactive_link_cache[ $cache_key ];
+		}
+
 		$existing = absint( $item->get_meta( self::ITEM_META_ENTRY_ID, true ) );
 
 		if ( $existing ) {
+			self::$retroactive_link_cache[ $cache_key ] = $existing;
 			return $existing;
 		}
 
 		if ( ! $form_id || ! class_exists( 'GFAPI' ) ) {
+			self::$retroactive_link_cache[ $cache_key ] = 0;
 			return 0;
 		}
 
 		$entry_id = 0;
-		if ( class_exists( 'GFAPI' ) ) {
-			$entries = GFAPI::get_entries(
-				$form_id,
-				array(
-					'status'        => 'active',
-					'field_filters' => array(
-						array(
-							'key'   => 'wpca_er_wc_order_item_id',
-							'value' => (string) $item_id,
-						),
+		$entries  = GFAPI::get_entries(
+			$form_id,
+			array(
+				'status'        => 'active',
+				'field_filters' => array(
+					array(
+						'key'   => 'wpca_er_wc_order_item_id',
+						'value' => (string) $item_id,
 					),
 				),
-				array(
-					'key'       => 'id',
-					'direction' => 'DESC',
-				),
-				array(
-					'offset'    => 0,
-					'page_size' => 1,
-				)
-			);
+			),
+			array(
+				'key'       => 'id',
+				'direction' => 'DESC',
+			),
+			array(
+				'offset'    => 0,
+				'page_size' => 1,
+			)
+		);
 
-			if ( ! is_wp_error( $entries ) && ! empty( $entries ) ) {
-				$first    = reset( $entries );
-				$entry_id = isset( $first['id'] ) ? absint( $first['id'] ) : 0;
-			}
+		if ( ! is_wp_error( $entries ) && ! empty( $entries ) ) {
+			$first    = reset( $entries );
+			$entry_id = isset( $first['id'] ) ? absint( $first['id'] ) : 0;
 		}
 
 		if ( ! $entry_id ) {
+			self::$retroactive_link_cache[ $cache_key ] = 0;
 			return 0;
 		}
 
@@ -881,6 +918,8 @@ class WPCA_ER_Order_Bridge {
 				$form_id
 			)
 		);
+
+		self::$retroactive_link_cache[ $cache_key ] = $entry_id;
 
 		return $entry_id;
 	}

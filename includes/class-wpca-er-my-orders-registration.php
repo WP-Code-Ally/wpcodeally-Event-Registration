@@ -15,13 +15,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WPCA_ER_My_Orders_Registration {
 
 	/**
-	 * Order statuses that allow opening the registration flow (matches checkout validation).
-	 *
-	 * @var string[]
-	 */
-	private const ALLOWED_STATUSES = array( 'processing', 'completed', 'on-hold' );
-
-	/**
 	 * Register hooks.
 	 *
 	 * @return void
@@ -83,7 +76,7 @@ class WPCA_ER_My_Orders_Registration {
 				continue;
 			}
 			$aria = ! empty( $action['aria-label'] ) ? $action['aria-label'] : $action['name'];
-			echo '<a href="' . esc_url( $action['url'] ) . '" class="woocommerce-button' . esc_attr( $wp_button_class ) . ' button ono-er-orders-reg-link ' . esc_attr( sanitize_html_class( $key ) ) . '" aria-label="' . esc_attr( $aria ) . '">' . esc_html( $action['name'] ) . '</a> ';
+			echo '<a href="' . esc_url( $action['url'] ) . '" class="woocommerce-button' . esc_attr( $wp_button_class ) . ' button wpca-er-orders-reg-link ' . esc_attr( sanitize_html_class( $key ) ) . '" aria-label="' . esc_attr( $aria ) . '">' . esc_html( $action['name'] ) . '</a> ';
 		}
 	}
 
@@ -108,14 +101,14 @@ class WPCA_ER_My_Orders_Registration {
 		/**
 		 * Filter registration actions appended to the My Account orders table.
 		 *
-		 * @param array    $actions Incoming actions (core + Ono).
+		 * @param array    $actions Incoming actions (core + plugin).
 		 * @param WC_Order $order   Order.
 		 */
 		return apply_filters( 'wpca_er_my_account_order_registration_actions', array_merge( $actions, $extra ), $order );
 	}
 
 	/**
-	 * Build Ono registration action rows for one order.
+	 * Build registration action rows for one order.
 	 *
 	 * @param WC_Order $order Order.
 	 * @return array<string, array{url:string,name:string,aria-label?:string}>
@@ -197,8 +190,6 @@ class WPCA_ER_My_Orders_Registration {
 	 * @return bool
 	 */
 	private function order_allows_registration( $order ) {
-		$statuses = apply_filters( 'wpca_er_my_account_registration_order_statuses', self::ALLOWED_STATUSES, $order );
-
-		return in_array( $order->get_status(), $statuses, true );
+		return WPCA_ER_Plugin::order_allows_registration( $order );
 	}
 }

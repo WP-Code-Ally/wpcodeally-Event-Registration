@@ -1,1 +1,7 @@
+/vendor/
+/node_modules/
+composer.lock
 .cursor-temp-logs/
+.phpunit.result.cache
+*.log
+*.log.old

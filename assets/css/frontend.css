@@ -1,0 +1,57 @@
+/**
+ * WPCodeAlly Event Registration — front-end styles.
+ *
+ * @package WPCA_Event_Registration
+ */
+
+.wpca-er-account-back,
+.wpca-er-account-actions {
+	margin-top: 1.5em;
+}
+
+.wpca-er-account-pagination {
+	margin-top: 1.5em;
+}
+
+.wpca-er-account-pagination .page-numbers {
+	display: inline-block;
+	margin: 0 0.25em;
+	padding: 0.35em 0.65em;
+	text-decoration: none;
+}
+
+.wpca-er-order-summary {
+	margin-top: 2em;
+	padding-top: 1.5em;
+	border-top: 1px solid #ddd;
+}
+
+.wpca-er-order-summary__table {
+	width: 100%;
+	max-width: 520px;
+}
+
+.wpca-er-order-summary__table td.wpca-er-order-summary__amount,
+.wpca-er-order-summary__table th.wpca-er-order-summary__amount {
+	text-align: right;
+}
+
+.wpca-er-order-summary__table th[scope="row"] {
+	text-align: left;
+}
+
+.wpca-er-order-summary__row--highlight {
+	font-weight: 600;
+}
+
+.wpca-er-landing {
+	margin-bottom: 1em;
+}
+
+.wpca-er-orders-reg-link {
+	margin-left: 0.35em;
+}
+
+.wpca-er-orders-reg-link:first-child {
+	margin-left: 0;
+}

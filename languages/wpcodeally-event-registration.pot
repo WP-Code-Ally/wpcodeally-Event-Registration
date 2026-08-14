@@ -1,0 +1,367 @@
+# Copyright (C) 2026 WPCodeAlly
+# This file is distributed under the same license as the WPCodeAlly Event Registration plugin.
+msgid ""
+msgstr ""
+"Project-Id-Version: WPCodeAlly Event Registration 1.0.7\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wpcodeally-event-registration\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-08-14T21:56:38+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: wpcodeally-event-registration\n"
+
+#. Plugin Name of the plugin
+#: wpcodeally-event-registration.php:3
+#: includes/class-wpca-er-privacy.php:35
+#: includes/class-wpca-er-privacy.php:50
+msgid "WPCodeAlly Event Registration"
+msgstr ""
+
+#. Plugin URI of the plugin
+#. Author URI of the plugin
+#: wpcodeally-event-registration.php:4
+#: wpcodeally-event-registration.php:10
+msgid "https://www.wpcodeally.com/"
+msgstr ""
+
+#. Description of the plugin
+#: wpcodeally-event-registration.php:5
+msgid "Links Gravity Forms registrations to WooCommerce orders. Redirects customers to a per-product registration page after checkout, pre-fills the form on return visits, and adds Edit registration buttons to My Account → Orders."
+msgstr ""
+
+#. Author of the plugin
+#: wpcodeally-event-registration.php:9
+msgid "WPCodeAlly"
+msgstr ""
+
+#: includes/class-wpca-er-account.php:121
+#: includes/class-wpca-er-account.php:132
+#: includes/class-wpca-er-privacy.php:113
+msgid "Event registrations"
+msgstr ""
+
+#: includes/class-wpca-er-account.php:160
+msgid "Back to all registrations"
+msgstr ""
+
+#: includes/class-wpca-er-account.php:178
+msgid "Invalid edit link. Please open registrations from your orders page."
+msgstr ""
+
+#: includes/class-wpca-er-account.php:184
+msgid "Order not found."
+msgstr ""
+
+#: includes/class-wpca-er-account.php:189
+msgid "You do not have permission to edit this registration."
+msgstr ""
+
+#: includes/class-wpca-er-account.php:195
+msgid "Line item not found."
+msgstr ""
+
+#: includes/class-wpca-er-account.php:201
+msgid "Product not found."
+msgstr ""
+
+#: includes/class-wpca-er-account.php:208
+msgid "No registration form is configured for this product."
+msgstr ""
+
+#: includes/class-wpca-er-account.php:215
+msgid "Registration has not been submitted yet."
+msgstr ""
+
+#: includes/class-wpca-er-account.php:217
+#: templates/myaccount/event-registrations.php:67
+msgid "Complete registration"
+msgstr ""
+
+#: includes/class-wpca-er-account.php:224
+#: includes/class-wpca-er-my-orders-registration.php:156
+msgid "Edit registration"
+msgstr ""
+
+#: includes/class-wpca-er-account.php:233
+msgid "Back to list"
+msgstr ""
+
+#: includes/class-wpca-er-account.php:290
+msgid "Please sign in to view your registrations."
+msgstr ""
+
+#: includes/class-wpca-er-account.php:366
+msgid "Your event registrations"
+msgstr ""
+
+#: includes/class-wpca-er-account.php:370
+msgid "No event registrations appear on this page."
+msgstr ""
+
+#: includes/class-wpca-er-account.php:376
+msgid "Nothing is listed here yet. This area only shows orders that include a product with a Gravity Forms form ID under Product data → Event registration. A separate registration page is optional: if none is set, links use My Account → Event registrations with your order key."
+msgstr ""
+
+#: includes/class-wpca-er-account.php:377
+msgid "Orders must be Processing, Completed, or On hold, and be tied to your account (guest orders only appear after you sign in with the same customer record WooCommerce associates with the purchase)."
+msgstr ""
+
+#: includes/class-wpca-er-account.php:378
+msgid "If the Event registrations menu link or page does not load, open Settings → Permalinks and click Save once to refresh rewrite rules."
+msgstr ""
+
+#: includes/class-wpca-er-account.php:425
+msgid "Event registrations pages"
+msgstr ""
+
+#: includes/class-wpca-er-admin-settings.php:70
+msgid "Event registration defaults"
+msgstr ""
+
+#: includes/class-wpca-er-admin-settings.php:71
+#: includes/class-wpca-er-my-orders-registration.php:173
+#: includes/class-wpca-er-product-admin.php:282
+msgid "Event registration"
+msgstr ""
+
+#: includes/class-wpca-er-admin-settings.php:130
+msgid "Settings saved."
+msgstr ""
+
+#: includes/class-wpca-er-admin-settings.php:138
+msgid "The default page does not appear to contain a Gravity Form or the <code>[WPCA_ER_registration]</code> shortcode. Embed your form as usual, or add the shortcode, so customers see a registration form after checkout."
+msgstr ""
+
+#: includes/class-wpca-er-admin-settings.php:151
+msgid "Default registration page"
+msgstr ""
+
+#: includes/class-wpca-er-admin-settings.php:162
+msgid "&mdash; None &mdash;"
+msgstr ""
+
+#: includes/class-wpca-er-admin-settings.php:168
+msgid "Optional. Used when a product has a Gravity Forms ID but no registration page on the product. Embed Gravity Forms on that page normally, or use [WPCA_ER_registration] if you want one template page."
+msgstr ""
+
+#: includes/class-wpca-er-admin-settings.php:171
+msgid "Per product:"
+msgstr ""
+
+#: includes/class-wpca-er-admin-settings.php:172
+msgid "Edit each event product (General tab) and choose its registration page or URL—typically a page that already contains the correct Gravity Form."
+msgstr ""
+
+#: includes/class-wpca-er-admin-settings.php:177
+msgid "Debug logging"
+msgstr ""
+
+#: includes/class-wpca-er-admin-settings.php:182
+msgid "Write technical messages to wp-content/wpcodeally-event-registration.log (no personal data)."
+msgstr ""
+
+#. translators: %1$s: product name, %2$s: order number.
+#: includes/class-wpca-er-my-orders-registration.php:159
+#, php-format
+msgid "Edit registration for %1$s, order number %2$s"
+msgstr ""
+
+#. translators: %s: order number.
+#: includes/class-wpca-er-my-orders-registration.php:161
+#, php-format
+msgid "Edit registration, order number %s"
+msgstr ""
+
+#. translators: %1$s: product name, %2$s: order number.
+#: includes/class-wpca-er-my-orders-registration.php:176
+#, php-format
+msgid "Complete event registration for %1$s, order number %2$s"
+msgstr ""
+
+#. translators: %s: order number.
+#: includes/class-wpca-er-my-orders-registration.php:178
+#, php-format
+msgid "Complete event registration, order number %s"
+msgstr ""
+
+#: includes/class-wpca-er-order-bridge.php:256
+#: includes/class-wpca-er-order-bridge.php:275
+msgid "You are editing your existing registration. Update the fields below and submit to save changes."
+msgstr ""
+
+#: includes/class-wpca-er-order-bridge.php:306
+msgid "This order already has a registration on file. Please use My Account to edit your registration."
+msgstr ""
+
+#: includes/class-wpca-er-order-bridge.php:313
+#: includes/class-wpca-er-public-landing.php:60
+msgid "Registration is only available for paid or processing orders."
+msgstr ""
+
+#: includes/class-wpca-er-order-bridge.php:515
+msgid "Your order"
+msgstr ""
+
+#: includes/class-wpca-er-order-bridge.php:517
+#: templates/myaccount/event-registrations.php:20
+#: templates/myaccount/event-registrations.php:42
+msgid "Order"
+msgstr ""
+
+#: includes/class-wpca-er-order-bridge.php:520
+msgid "Date"
+msgstr ""
+
+#: includes/class-wpca-er-order-bridge.php:525
+msgid "Billing"
+msgstr ""
+
+#: includes/class-wpca-er-order-bridge.php:535
+msgid "Total"
+msgstr ""
+
+#: includes/class-wpca-er-order-bridge.php:540
+msgid "Payment"
+msgstr ""
+
+#: includes/class-wpca-er-plugin.php:188
+msgid "WPCodeAlly Event Registration requires WooCommerce to be active."
+msgstr ""
+
+#: includes/class-wpca-er-plugin.php:198
+msgid "WPCodeAlly Event Registration requires Gravity Forms to be active."
+msgstr ""
+
+#: includes/class-wpca-er-privacy.php:114
+msgid "WooCommerce order linkage for event registrations managed by this plugin."
+msgstr ""
+
+#: includes/class-wpca-er-privacy.php:118
+msgid "Order number"
+msgstr ""
+
+#: includes/class-wpca-er-privacy.php:122
+msgid "Event product"
+msgstr ""
+
+#: includes/class-wpca-er-privacy.php:126
+#: includes/class-wpca-er-product-admin.php:318
+#: includes/class-wpca-er-product-admin.php:451
+msgid "Gravity Forms form ID"
+msgstr ""
+
+#: includes/class-wpca-er-privacy.php:130
+msgid "Linked entry ID"
+msgstr ""
+
+#: includes/class-wpca-er-privacy.php:131
+#: templates/myaccount/event-registrations.php:59
+msgid "Not submitted"
+msgstr ""
+
+#: includes/class-wpca-er-privacy.php:203
+msgid "Removed WooCommerce order linkage metadata created by WPCodeAlly Event Registration. Gravity Forms entries were not deleted."
+msgstr ""
+
+#: includes/class-wpca-er-product-admin.php:284
+msgid "Each event can use its own page after checkout. You may embed Gravity Forms the usual way (block or [gravityform] shortcode). Optional: use [WPCA_ER_registration] on a shared default page if you prefer one template."
+msgstr ""
+
+#: includes/class-wpca-er-product-admin.php:287
+#: includes/class-wpca-er-product-admin.php:432
+msgid "Registration page"
+msgstr ""
+
+#: includes/class-wpca-er-product-admin.php:294
+msgid "&mdash; Select a page &mdash;"
+msgstr ""
+
+#: includes/class-wpca-er-product-admin.php:305
+#: includes/class-wpca-er-product-admin.php:446
+msgid "Or registration URL"
+msgstr ""
+
+#: includes/class-wpca-er-product-admin.php:307
+msgid "Use this instead of the dropdown for an external address. Leave empty to use the page above."
+msgstr ""
+
+#: includes/class-wpca-er-product-admin.php:319
+msgid "Optional. Auto-detected from the registration page when left blank. Set manually only if auto-detection picks the wrong form."
+msgstr ""
+
+#: includes/class-wpca-er-product-admin.php:334
+msgid "Checkout redirect priority"
+msgstr ""
+
+#: includes/class-wpca-er-product-admin.php:335
+msgid "If one order contains several events, the lowest number is used first for the post-checkout redirect (default 10)."
+msgstr ""
+
+#: includes/class-wpca-er-product-admin.php:438
+msgid "&mdash; Same as parent / none &mdash;"
+msgstr ""
+
+#: includes/class-wpca-er-product-admin.php:456
+msgid "Redirect priority"
+msgstr ""
+
+#: includes/class-wpca-er-public-landing.php:51
+msgid "Your registration link will appear after you complete an order."
+msgstr ""
+
+#: includes/class-wpca-er-public-landing.php:56
+msgid "This registration link is invalid or has expired."
+msgstr ""
+
+#: includes/class-wpca-er-public-landing.php:76
+msgid "No registration was found for this order."
+msgstr ""
+
+#: includes/class-wpca-er-public-landing.php:81
+msgid "The product for this registration could not be found."
+msgstr ""
+
+#: includes/class-wpca-er-public-landing.php:86
+msgid "No registration form is configured for this purchase."
+msgstr ""
+
+#: includes/class-wpca-er-public-landing.php:90
+msgid "Gravity Forms is required to display the registration form."
+msgstr ""
+
+#: templates/myaccount/event-registrations.php:21
+#: templates/myaccount/event-registrations.php:45
+msgid "Order date"
+msgstr ""
+
+#: templates/myaccount/event-registrations.php:22
+#: templates/myaccount/event-registrations.php:48
+msgid "Order total"
+msgstr ""
+
+#: templates/myaccount/event-registrations.php:23
+#: templates/myaccount/event-registrations.php:51
+msgid "Event"
+msgstr ""
+
+#: templates/myaccount/event-registrations.php:24
+#: templates/myaccount/event-registrations.php:54
+msgid "Registration"
+msgstr ""
+
+#: templates/myaccount/event-registrations.php:25
+#: templates/myaccount/event-registrations.php:63
+msgid "Actions"
+msgstr ""
+
+#: templates/myaccount/event-registrations.php:57
+msgid "Submitted"
+msgstr ""
+
+#: templates/myaccount/event-registrations.php:65
+msgid "Edit"
+msgstr ""

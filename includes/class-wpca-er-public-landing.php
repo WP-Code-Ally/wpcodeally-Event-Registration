@@ -21,6 +21,7 @@ class WPCA_ER_Public_Landing {
 	 */
 	public function hooks() {
 		add_shortcode( 'WPCA_ER_registration', array( $this, 'shortcode_registration' ) );
+		add_shortcode( 'wpca_er_registration', array( $this, 'shortcode_registration' ) );
 	}
 
 	/**
@@ -55,7 +56,11 @@ class WPCA_ER_Public_Landing {
 			return '<div class="wpca-er-landing woocommerce-error"><p>' . esc_html__( 'This registration link is invalid or has expired.', 'wpcodeally-event-registration' ) . '</p></div>';
 		}
 
-		$item_id = isset( $_GET[ WPCA_ER_Order_Bridge::QUERY_ITEM_PARAM ] ) ? absint( wp_unslash( $_GET[ WPCA_ER_Order_Bridge::QUERY_ITEM_PARAM ] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! WPCA_ER_Plugin::order_allows_registration( $order ) ) {
+			return '<div class="wpca-er-landing woocommerce-error"><p>' . esc_html__( 'Registration is only available for paid or processing orders.', 'wpcodeally-event-registration' ) . '</p></div>';
+		}
+
+		$item_id = WPCA_ER_Order_Bridge::get_request_item_id();
 		$item    = null;
 
 		if ( $item_id ) {
@@ -73,7 +78,7 @@ class WPCA_ER_Public_Landing {
 
 		$product = $item->get_product();
 		if ( ! $product ) {
-			return '';
+			return '<div class="wpca-er-landing woocommerce-error"><p>' . esc_html__( 'The product for this registration could not be found.', 'wpcodeally-event-registration' ) . '</p></div>';
 		}
 
 		$form_id = WPCA_ER_Product_Admin::get_registration_form_id_for_order_item( $item );
@@ -82,7 +87,7 @@ class WPCA_ER_Public_Landing {
 		}
 
 		if ( ! function_exists( 'gravity_form' ) ) {
-			return '';
+			return '<div class="wpca-er-landing woocommerce-error"><p>' . esc_html__( 'Gravity Forms is required to display the registration form.', 'wpcodeally-event-registration' ) . '</p></div>';
 		}
 
 		ob_start();

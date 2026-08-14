@@ -65,6 +65,13 @@ final class WPCA_ER_Plugin {
 	public $checkout_redirect;
 
 	/**
+	 * Thank-you tracking bridge service instance.
+	 *
+	 * @var WPCA_ER_Thankyou_Bridge|null
+	 */
+	public $thankyou_bridge;
+
+	/**
 	 * Public landing service instance.
 	 *
 	 * @var WPCA_ER_Public_Landing|null
@@ -102,8 +109,66 @@ final class WPCA_ER_Plugin {
 	 * WPCA_ER_Plugin constructor.
 	 */
 	private function __construct() {
+		add_action( 'init', array( $this, 'load_textdomain' ) );
 		add_action( 'before_woocommerce_init', array( $this, 'declare_hpos_compatibility' ) );
 		add_action( 'plugins_loaded', array( $this, 'init' ), 20 );
+	}
+
+	/**
+	 * Load plugin translations.
+	 *
+	 * @return void
+	 */
+	public function load_textdomain() {
+		load_plugin_textdomain(
+			'wpcodeally-event-registration',
+			false,
+			dirname( WPCA_ER_BASENAME ) . '/languages'
+		);
+	}
+
+	/**
+	 * Order statuses that allow the registration flow.
+	 *
+	 * @param WC_Order|null $order Optional order for filter context.
+	 * @return string[]
+	 */
+	public static function registration_order_statuses( $order = null ) {
+		$statuses = array( 'processing', 'completed', 'on-hold' );
+
+		/**
+		 * Filter order statuses that allow registration submit/edit flows.
+		 *
+		 * @param string[]      $statuses Allowed WooCommerce order statuses.
+		 * @param WC_Order|null $order    Order when available.
+		 */
+		$statuses = apply_filters( 'wpca_er_registration_order_statuses', $statuses, $order );
+
+		if ( $order instanceof WC_Order ) {
+			/**
+			 * Backward compatibility for the pre-1.0.5 filter name.
+			 *
+			 * @param string[] $statuses Allowed WooCommerce order statuses.
+			 * @param WC_Order $order    Order.
+			 */
+			$statuses = apply_filters( 'wpca_er_my_account_registration_order_statuses', $statuses, $order );
+		}
+
+		return $statuses;
+	}
+
+	/**
+	 * Whether an order status allows registration.
+	 *
+	 * @param WC_Order $order Order.
+	 * @return bool
+	 */
+	public static function order_allows_registration( $order ) {
+		if ( ! $order instanceof WC_Order ) {
+			return false;
+		}
+
+		return in_array( $order->get_status(), self::registration_order_statuses( $order ), true );
 	}
 
 	/**
@@ -146,13 +211,18 @@ final class WPCA_ER_Plugin {
 		require_once WPCA_ER_PATH . 'includes/class-wpca-er-order-bridge.php';
 		require_once WPCA_ER_PATH . 'includes/class-wpca-er-product-admin.php';
 		require_once WPCA_ER_PATH . 'includes/class-wpca-er-checkout-redirect.php';
+		require_once WPCA_ER_PATH . 'includes/class-wpca-er-thankyou-bridge.php';
 		require_once WPCA_ER_PATH . 'includes/class-wpca-er-public-landing.php';
 		require_once WPCA_ER_PATH . 'includes/class-wpca-er-account.php';
 		require_once WPCA_ER_PATH . 'includes/class-wpca-er-my-orders-registration.php';
+		require_once WPCA_ER_PATH . 'includes/class-wpca-er-privacy.php';
+		require_once WPCA_ER_PATH . 'includes/class-wpca-er-assets.php';
+		require_once WPCA_ER_PATH . 'includes/integrations/class-wpca-er-compat-loader.php';
 
 		$this->bridge                 = new WPCA_ER_Order_Bridge();
 		$this->product_admin          = new WPCA_ER_Product_Admin();
 		$this->checkout_redirect      = new WPCA_ER_Checkout_Redirect();
+		$this->thankyou_bridge        = new WPCA_ER_Thankyou_Bridge();
 		$this->public_landing         = new WPCA_ER_Public_Landing();
 		$this->account                = new WPCA_ER_Account();
 		$this->my_orders_registration = new WPCA_ER_My_Orders_Registration();
@@ -160,9 +230,14 @@ final class WPCA_ER_Plugin {
 		$this->bridge->hooks();
 		$this->product_admin->hooks();
 		$this->checkout_redirect->hooks();
+		$this->thankyou_bridge->hooks();
 		$this->public_landing->hooks();
 		$this->account->hooks();
 		$this->my_orders_registration->hooks();
+
+		WPCA_ER_Privacy::hooks();
+		WPCA_ER_Assets::hooks();
+		WPCA_ER_Compat_Loader::init();
 
 		add_action( 'admin_init', array( $this, 'maybe_flush_rewrite_rules_on_upgrade' ) );
 

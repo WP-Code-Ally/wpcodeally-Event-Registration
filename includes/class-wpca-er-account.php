@@ -17,14 +17,74 @@ class WPCA_ER_Account {
 	public const ENDPOINT = 'event-registration';
 
 	/**
+	 * Default number of orders fetched per page on the registrations list.
+	 */
+	public const DEFAULT_ORDERS_PER_PAGE = 20;
+
+	/**
 	 * Register hooks.
 	 *
 	 * @return void
 	 */
 	public function hooks() {
+		add_filter( 'woocommerce_account_menu_items', array( $this, 'menu_items' ) );
 		add_filter( 'woocommerce_get_query_vars', array( $this, 'register_account_query_var' ) );
 		add_action( 'woocommerce_account_' . self::ENDPOINT . '_endpoint', array( $this, 'render_endpoint' ) );
 		add_filter( 'woocommerce_endpoint_' . self::ENDPOINT . '_title', array( $this, 'endpoint_document_title' ), 10, 3 );
+	}
+
+	/**
+	 * Query arg for My Account edit mode.
+	 */
+	public const QUERY_EDIT = 'wpca_er_edit';
+
+	/**
+	 * Query arg for order ID in My Account edit mode.
+	 */
+	public const QUERY_ORDER = 'wpca_er_order';
+
+	/**
+	 * Query arg for line item ID in My Account edit mode.
+	 */
+	public const QUERY_ITEM = 'wpca_er_item';
+
+	/**
+	 * Legacy query args retained for backward compatibility with existing links.
+	 */
+	private const LEGACY_QUERY_EDIT  = 'ono_edit';
+	private const LEGACY_QUERY_ORDER = 'ono_order';
+	private const LEGACY_QUERY_ITEM  = 'ono_item';
+
+	/**
+	 * Whether the current request is an edit-registration deep link.
+	 *
+	 * @return bool
+	 */
+	private function is_edit_request() {
+		$has_edit  = isset( $_GET[ self::QUERY_EDIT ] ) || isset( $_GET[ self::LEGACY_QUERY_EDIT ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$has_order = isset( $_GET[ self::QUERY_ORDER ] ) || isset( $_GET[ self::LEGACY_QUERY_ORDER ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$has_item  = isset( $_GET[ self::QUERY_ITEM ] ) || isset( $_GET[ self::LEGACY_QUERY_ITEM ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		return $has_edit && $has_order && $has_item && isset( $_GET['_wpnonce'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	}
+
+	/**
+	 * Read an edit-flow query arg, accepting legacy names.
+	 *
+	 * @param string $current Current param name.
+	 * @param string $legacy  Legacy param name.
+	 * @return int
+	 */
+	private function get_edit_query_int( $current, $legacy ) {
+		if ( isset( $_GET[ $current ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return absint( wp_unslash( $_GET[ $current ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		}
+
+		if ( isset( $_GET[ $legacy ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return absint( wp_unslash( $_GET[ $legacy ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		}
+
+		return 0;
 	}
 
 	/**
@@ -87,7 +147,7 @@ class WPCA_ER_Account {
 	 * @return void
 	 */
 	public function render_endpoint() {
-		if ( isset( $_GET['ono_edit'], $_GET['ono_order'], $_GET['ono_item'], $_GET['_wpnonce'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( $this->is_edit_request() ) {
 			$this->maybe_render_edit_form();
 			return;
 		}
@@ -97,7 +157,7 @@ class WPCA_ER_Account {
 			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Gravity Forms markup; notices in helper are escaped.
 			echo WPCA_ER_Public_Landing::get_registration_markup_from_request();
 			$list_url = wc_get_account_endpoint_url( self::ENDPOINT );
-			echo '<p class="wpca-er-account-back" style="margin-top:1.5em;"><a class="button button-secondary" href="' . esc_url( $list_url ) . '">' . esc_html__( 'Back to all registrations', 'wpcodeally-event-registration' ) . '</a></p>';
+			echo '<p class="wpca-er-account-back"><a class="button button-secondary" href="' . esc_url( $list_url ) . '">' . esc_html__( 'Back to all registrations', 'wpcodeally-event-registration' ) . '</a></p>';
 			return;
 		}
 
@@ -110,8 +170,8 @@ class WPCA_ER_Account {
 	 * @return void
 	 */
 	private function maybe_render_edit_form() {
-		$order_id = isset( $_GET['ono_order'] ) ? absint( wp_unslash( $_GET['ono_order'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$item_id  = isset( $_GET['ono_item'] ) ? absint( wp_unslash( $_GET['ono_item'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$order_id = $this->get_edit_query_int( self::QUERY_ORDER, self::LEGACY_QUERY_ORDER );
+		$item_id  = $this->get_edit_query_int( self::QUERY_ITEM, self::LEGACY_QUERY_ITEM );
 		$nonce    = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		if ( ! $order_id || ! $item_id || ! wp_verify_nonce( $nonce, 'WPCA_ER_edit_' . $order_id ) ) {
@@ -170,7 +230,7 @@ class WPCA_ER_Account {
 		WPCA_ER_Order_Bridge::clear_edit_context();
 
 		$list_url = wc_get_account_endpoint_url( self::ENDPOINT );
-		echo '<p style="margin-top:1.5em;"><a class="button button-secondary" href="' . esc_url( $list_url ) . '">' . esc_html__( 'Back to list', 'wpcodeally-event-registration' ) . '</a></p>';
+		echo '<p class="wpca-er-account-actions"><a class="button button-secondary" href="' . esc_url( $list_url ) . '">' . esc_html__( 'Back to list', 'wpcodeally-event-registration' ) . '</a></p>';
 	}
 
 	/**
@@ -209,9 +269,9 @@ class WPCA_ER_Account {
 		return wp_nonce_url(
 			add_query_arg(
 				array(
-					'ono_edit'  => '1',
-					'ono_order' => $order->get_id(),
-					'ono_item'  => $item_id,
+					self::QUERY_EDIT  => '1',
+					self::QUERY_ORDER => $order->get_id(),
+					self::QUERY_ITEM  => $item_id,
 				),
 				wc_get_account_endpoint_url( self::ENDPOINT )
 			),
@@ -231,15 +291,39 @@ class WPCA_ER_Account {
 			return;
 		}
 
-		$orders = wc_get_orders(
+		$current_page = absint( get_query_var( self::ENDPOINT ) );
+		if ( $current_page < 1 ) {
+			$current_page = 1;
+		}
+
+		/**
+		 * Filter how many customer orders are loaded per page on My Account → Event registrations.
+		 *
+		 * @param int $per_page Orders per page.
+		 */
+		$per_page = max( 1, (int) apply_filters( 'wpca_er_registrations_orders_per_page', self::DEFAULT_ORDERS_PER_PAGE ) );
+
+		$order_query = wc_get_orders(
 			array(
 				'customer' => $user_id,
-				'status'   => array( 'processing', 'completed', 'on-hold' ),
-				'limit'    => 100,
+				'status'   => WPCA_ER_Plugin::registration_order_statuses(),
+				'limit'    => $per_page,
+				'page'     => $current_page,
+				'paginate' => true,
 				'orderby'  => 'date',
 				'order'    => 'DESC',
 			)
 		);
+
+		$orders      = array();
+		$total_pages = 1;
+
+		if ( is_object( $order_query ) && isset( $order_query->orders ) ) {
+			$orders      = is_array( $order_query->orders ) ? $order_query->orders : array();
+			$total_pages = max( 1, (int) $order_query->max_num_pages );
+		} elseif ( is_array( $order_query ) ) {
+			$orders = $order_query;
+		}
 
 		$rows = array();
 
@@ -282,7 +366,14 @@ class WPCA_ER_Account {
 		echo '<h3>' . esc_html__( 'Your event registrations', 'wpcodeally-event-registration' ) . '</h3>';
 
 		if ( empty( $rows ) ) {
-			echo '<div class="woocommerce-info ono-er-account-empty"><p>' . esc_html__( 'Nothing is listed here yet. This area only shows orders that include a product with a Gravity Forms form ID under Product data → Event registration. A separate registration page is optional: if none is set, links use My Account → Event registrations with your order key.', 'wpcodeally-event-registration' ) . '</p><ul>';
+			if ( $current_page > 1 && $total_pages > 1 ) {
+				echo '<div class="woocommerce-info"><p>' . esc_html__( 'No event registrations appear on this page.', 'wpcodeally-event-registration' ) . '</p></div>';
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- markup built with escaping helpers.
+				echo wpca_er()->account->get_pagination_markup( $current_page, $total_pages );
+				return;
+			}
+
+			echo '<div class="woocommerce-info wpca-er-account-empty"><p>' . esc_html__( 'Nothing is listed here yet. This area only shows orders that include a product with a Gravity Forms form ID under Product data → Event registration. A separate registration page is optional: if none is set, links use My Account → Event registrations with your order key.', 'wpcodeally-event-registration' ) . '</p><ul>';
 			echo '<li>' . esc_html__( 'Orders must be Processing, Completed, or On hold, and be tied to your account (guest orders only appear after you sign in with the same customer record WooCommerce associates with the purchase).', 'wpcodeally-event-registration' ) . '</li>';
 			echo '<li>' . esc_html__( 'If the Event registrations menu link or page does not load, open Settings → Permalinks and click Save once to refresh rewrite rules.', 'wpcodeally-event-registration' ) . '</li>';
 			echo '</ul></div>';
@@ -292,10 +383,45 @@ class WPCA_ER_Account {
 		wc_get_template(
 			'myaccount/event-registrations.php',
 			array(
-				'rows' => $rows,
+				'rows'         => $rows,
+				'current_page' => $current_page,
+				'total_pages'  => $total_pages,
 			),
 			'',
 			WPCA_ER_PATH . 'templates/'
 		);
+	}
+
+	/**
+	 * Build pagination links for the registrations endpoint.
+	 *
+	 * @param int $current_page Current page number.
+	 * @param int $total_pages  Total number of pages.
+	 * @return string
+	 */
+	public function get_pagination_markup( $current_page, $total_pages ) {
+		if ( $total_pages <= 1 || ! function_exists( 'wc_get_endpoint_url' ) ) {
+			return '';
+		}
+
+		$base = wc_get_endpoint_url( self::ENDPOINT, '%#%', wc_get_page_permalink( 'myaccount' ) );
+
+		$links = paginate_links(
+			array(
+				'base'      => esc_url_raw( trailingslashit( $base ) ),
+				'format'    => '%#%',
+				'current'   => $current_page,
+				'total'     => $total_pages,
+				'type'      => 'list',
+				'prev_text' => '&larr;',
+				'next_text' => '&rarr;',
+			)
+		);
+
+		if ( ! $links ) {
+			return '';
+		}
+
+		return '<nav class="woocommerce-pagination wpca-er-account-pagination" aria-label="' . esc_attr__( 'Event registrations pages', 'wpcodeally-event-registration' ) . '">' . $links . '</nav>';
 	}
 }
