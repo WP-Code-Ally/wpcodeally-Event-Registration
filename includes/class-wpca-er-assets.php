@@ -70,13 +70,7 @@ class WPCA_ER_Assets {
 	 */
 	private static function should_load_frontend_styles() {
 		if ( function_exists( 'is_account_page' ) && is_account_page() ) {
-			if ( function_exists( 'is_wc_endpoint_url' ) && is_wc_endpoint_url( WPCA_ER_Account::ENDPOINT ) ) {
-				return true;
-			}
-
-			if ( function_exists( 'is_wc_endpoint_url' ) && is_wc_endpoint_url( 'orders' ) ) {
-				return true;
-			}
+			return true;
 		}
 
 		if ( isset( $_GET['order'], $_GET['key'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended

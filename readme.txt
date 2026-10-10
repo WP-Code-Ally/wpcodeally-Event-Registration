@@ -4,7 +4,7 @@ Tags: woocommerce, gravity-forms, events, registration, checkout
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.0.7
+Stable tag: 1.0.9
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -53,6 +53,12 @@ Removes options `WPCA_ER_debug`, `WPCA_ER_registration_page_id`, and `WPCA_ER_in
 The recap is only added for **Text** confirmations. **Redirect** or **Page** confirmations cannot be extended the same way; use a thank-you page that shows order details instead.
 
 == Changelog ==
+
+= 1.0.9 =
+* Fix: add visible spacing between View and Event registration buttons on My Account and Orders.
+
+= 1.0.8 =
+* Fix: post-checkout registration landing no longer redirects to the homepage. Setting Woo’s `order-received` query var made `is_wc_endpoint_url()` true off the checkout page, so `wc_template_redirect()` sent shoppers home before the form could render.
 
 = 1.0.7 =
 * Restore Woo thank-you tracking on the first post-checkout registration landing (`wpca_er_checkout=1`) so PixelYourSite, GTM4WP, and `woocommerce_thankyou` fire once without sending customers through `/checkout/order-received/`.

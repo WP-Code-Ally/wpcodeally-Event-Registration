@@ -104,11 +104,10 @@ class WPCA_ER_Thankyou_Bridge {
 
 		$order_id = (string) $order->get_id();
 
-		global $wp;
-		if ( isset( $wp ) && is_object( $wp ) ) {
-			$wp->query_vars['order-received'] = $order_id;
-		}
-
+		// Do NOT set $wp->query_vars['order-received']. That makes is_wc_endpoint_url() true on a
+		// non-checkout page, and wc_template_redirect() then 404s / redirects to home — so the
+		// registration form never appears after checkout.
+		//
 		// PYS wooGetOrderIdFromRequest() typically reads order-received query var and/or GET;
 		// pysWooGetSubmittedOrderKey() already looks at key / order_key (already in the URL).
 		$_GET['order-received'] = $order_id; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -116,8 +115,24 @@ class WPCA_ER_Thankyou_Bridge {
 		add_filter( 'woocommerce_is_order_received_page', '__return_true' );
 		add_filter( 'woocommerce_thankyou_order_id', array( $this, 'filter_thankyou_order_id' ) );
 		add_filter( 'woocommerce_thankyou_order_key', array( $this, 'filter_thankyou_order_key' ) );
+		// Belt-and-suspenders if another plugin stamps the endpoint query var.
+		add_filter( 'woocommerce_account_endpoint_page_not_found', array( $this, 'allow_registration_landing_endpoint' ) );
 
 		$this->should_emit = true;
+	}
+
+	/**
+	 * Prevent Woo from treating the registration landing as a misplaced account/checkout endpoint.
+	 *
+	 * @param bool $not_found Whether to trigger the endpoint-not-found redirect/404.
+	 * @return bool
+	 */
+	public function allow_registration_landing_endpoint( $not_found ) {
+		if ( $this->should_emit || $this->get_validated_checkout_order() instanceof WC_Order ) {
+			return false;
+		}
+
+		return $not_found;
 	}
 
 	/**

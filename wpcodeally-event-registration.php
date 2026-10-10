@@ -3,7 +3,7 @@
  * Plugin Name:       WPCodeAlly Event Registration
  * Plugin URI:        https://www.wpcodeally.com/
  * Description:       Links Gravity Forms registrations to WooCommerce orders. Redirects customers to a per-product registration page after checkout, pre-fills the form on return visits, and adds Edit registration buttons to My Account → Orders.
- * Version:           1.0.7
+ * Version:           1.0.9
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            WPCodeAlly
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'WPCA_ER_VERSION', '1.0.7' );
+define( 'WPCA_ER_VERSION', '1.0.9' );
 define( 'WPCA_ER_PLUGIN_FILE', __FILE__ );
 define( 'WPCA_ER_PATH', plugin_dir_path( __FILE__ ) );
 define( 'WPCA_ER_URL', plugin_dir_url( __FILE__ ) );

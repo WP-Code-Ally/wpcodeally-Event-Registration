@@ -48,10 +48,22 @@
 	margin-bottom: 1em;
 }
 
-.wpca-er-orders-reg-link {
-	margin-left: 0.35em;
+.woocommerce-account .woocommerce-orders-table__cell-order-actions,
+.woocommerce-account td.woocommerce-orders-table__cell-order-actions,
+.woocommerce-account td.order-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.75rem 1rem;
 }
 
-.wpca-er-orders-reg-link:first-child {
+.woocommerce-account .woocommerce-orders-table__cell-order-actions .woocommerce-button,
+.woocommerce-account .woocommerce-orders-table__cell-order-actions .button,
+.woocommerce-account td.order-actions .button {
+	margin-left: 0;
+	margin-right: 0;
+}
+
+.wpca-er-orders-reg-link {
 	margin-left: 0;
 }
