@@ -72,6 +72,7 @@ try {
             ".cursor",
             ".cursor-temp-logs",
             "node_modules",
+            "vendor",
             "Developer",
             ".github",
             "tests",
